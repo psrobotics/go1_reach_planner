@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../')
+sys.path.append(['../', '../../deps/unitree_legged_sdk/lib/python/amd64'])
 
 #import sys
 #sys.path.extend(['/path/to/subfolder1', '/path/to/subfolder2'])
@@ -15,6 +15,9 @@ import time
 # lcm init
 import lcm
 from lcm_type.exlcm import motion_t
+
+# unitree sdk
+import robot_interface as sdk
 
 import scipy.io
 import h5py
@@ -74,31 +77,48 @@ def lcm_handler(channel, data):
     global_rpy[1] = pitch
     global_rpy[2] = rbt_state[2]
 
+
 # setup lcm
 lc = lcm.LCM()
 subscription = lc.subscribe("VICON_LCM", lcm_handler)
 print("lcm init done!")
 
-# setup socket
-ip = "192.168.123.15"  # destination IP of the jetson NX onboard
-port = 8088  # replace with the destination port number
-print("low level wtw socket init done!")
+# setup socket for walk these way
+#ip = "192.168.123.15"  # destination IP of the jetson NX onboard
+#port = 8088  # replace with the destination port number
+# setup socket for unitree mpc sdk
+HIGHLEVEL = 0xee
+LOWLEVEL  = 0xff
+udp = sdk.UDP(HIGHLEVEL, 8080, "192.168.123.161", 8082)
+cmd = sdk.HighCmd()
+state = sdk.HighState()
+udp.InitCmdData(cmd)
+print("low level mpc socket init done!")
 
 # command params, some with default trotting gait
-cmd_x_vel = 0.0
-cmd_y_vel = 0.0
-cmd_yaw_vel = 0.0
-cmd_height = 0.0 # -0.3~0.3, with 0 as normal height
-cmd_freq = 2.0 # 2.0~4.0
-cmd_phase = 0.5 # gait phase
-cmd_offset = 0.0 # gait offset
-cmd_bound = 0.0
-cmd_duration = 0.5
-cmd_footswing = 0.08 # foot swing height max(0,adj)*0.32+0.03
-cmd_ori_pitch = 0.0 # -0.4~0.4
-cmd_ori_roll = 0.0
-cmd_stance_width = 0.33 # fpp width
-cmd_stance_length = 0.40 # fpp len
+#cmd_x_vel = 0.0
+#cmd_y_vel = 0.0
+#cmd_yaw_vel = 0.0
+#cmd_height = 0.0 # -0.3~0.3, with 0 as normal height
+#cmd_freq = 2.0 # 2.0~4.0
+#cmd_phase = 0.5 # gait phase
+#cmd_offset = 0.0 # gait offset
+#cmd_bound = 0.0
+#cmd_duration = 0.5
+#cmd_footswing = 0.08 # foot swing height max(0,adj)*0.32+0.03
+#cmd_ori_pitch = 0.0 # -0.4~0.4
+#cmd_ori_roll = 0.0
+#cmd_stance_width = 0.33 # fpp width
+#cmd_stance_length = 0.40 # fpp len
+cmd.mode = 1     # 0:idle, default stand      1:forced stand     2:walk continuously
+cmd.gaitType = 0
+cmd.speedLevel = 0
+cmd.footRaiseHeight = 0
+cmd.bodyHeight = 0
+cmd.euler = [0, 0, 0]
+cmd.velocity = [0, 0]
+cmd.yawSpeed = 0.0
+cmd.reserve = 0
 
 # mat states
 rbt_state = np.zeros(3)
@@ -192,6 +212,10 @@ try:
         # check lcm call back in loop, update states
         lc.handle()
 
+        # rev state from low-level mpc
+        udp.Recv()
+        udp.GetRecv(state)
+
         # update state with state estimation value
         rbt_state[0] = 1.0
         rbt_state[1] = 1.0
@@ -243,18 +267,15 @@ try:
         if opti_mode == 0:
             opti_mode = 1
 
-        cmd_x_vel = x_vel_k_arr[opti_mode-1]*1.0
-        cmd_yaw_vel = omega_k_arr[opti_mode-1]*opti_ctr
-        cmd_height = height_arr[opti_mode-1]
-        cmd_ori_pitch = pitch_arr[opti_mode-1]
-        cmd_ori_roll = roll_arr[opti_mode-1]
+        cmd.mode = 2
+        cmd.gaitType = 2
+        cmd.velocity = [x_vel_k_arr[opti_mode-1]*1.0, 0] # -1  ~ +1
+        cmd.yawSpeed = omega_k_arr[opti_mode-1]*opti_ctr
+        cmd.bodyHeight = height_arr[opti_mode-1]
 
-        cmd_phase = phase_arr[opti_mode-1]
-        cmd_offset = offset_arr[opti_mode-1]
-        cmd_bound = bound_arr[opti_mode-1]
-        cmd_duration = duration_arr[opti_mode-1]
-        cmd_freq = freq_arr[opti_mode-1]
-
+        # send to robot
+        udp.SetSend(cmd)
+        udp.Send()
         
         # check if reach the target set
         v_dist_tar = data0[state_index_i[2], state_index_i[1], state_index_i[0]]
