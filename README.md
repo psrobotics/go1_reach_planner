@@ -116,3 +116,10 @@ Run examples with 'sudo' for memory locking.
 #### Python
 ##### arm
 change `sys.path.append('../lib/python/amd64')` to `sys.path.append('../lib/python/arm64')`
+
+
+### Run the vicon node
+```
+cd build
+sudo ./motioncapture_example vicon 192.168.1.39
+```
