@@ -20,6 +20,30 @@ import scipy.io
 import h5py
 import logging
 
+import threading
+
+def low_level_callback():
+    
+    #print (time.ctime())
+    # send to socket
+    low_command = np.array([cmd_x_vel, cmd_y_vel, cmd_yaw_vel,
+                            cmd_height, cmd_freq, cmd_phase, cmd_offset, cmd_bound, cmd_duration, cmd_footswing,
+                            cmd_ori_pitch, cmd_ori_roll, cmd_stance_width, cmd_stance_length], dtype=np.float64)
+    #print('low level command - {}'.format(low_command))
+    # Pack the NumPy array using tobytes()
+    low_command_bytes = low_command.tobytes()
+    send_udp_message(low_command_bytes, ip, port)
+
+    # save to csv, logger
+    csv_row = "{0:d},{1:.6f},{2:.6f},{3:.6f},{4:.6f},{5:.6f},{6:.6f},{7:.6f}".format(global_opti_mode,cmd_yaw_vel,
+                                                                                     global_xyz[0],global_xyz[1],global_xyz[2],
+                                                                                     global_rpy[0],global_rpy[1],global_rpy[2])
+    lgr.info(csv_row)
+    
+    # 100hz callback 0.025
+    threading.Timer(0.023, low_level_callback).start()
+
+
 # Send a UDP message to the specified IP address and port, low-level controller
 def send_udp_message(message, ip, port):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
@@ -113,8 +137,8 @@ tar_dist_thes = 0.2
 global_xyz = np.zeros(3)
 global_rpy = np.zeros(3)
 
-mode_r = 1
-ctr_r = 0.0
+global_opti_mode = 1
+global_opti_ctr = 0.0
 
 # array for different gait mode setups
 # turning rate k, we have 
@@ -122,14 +146,20 @@ omega_k_arr  = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 0.7, 0.6, 0.2])
 # forward velocity k
 x_vel_k_arr  = np.array([1.0, 0.8, 0.6, 0.4, 0.2, 1.0, 0.5, 3.0])
 # body gait state
-height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.12, 0.3])
+height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, -0.22, 0.3])
 pitch_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 roll_arr     = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-phase_arr    = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+
+phase_arr    = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0])
 offset_arr   = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 bound_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 duration_arr = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-freq_arr     = np.array([2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2, 2.2])
+freq_arr     = np.array([2.4, 2.4, 2.7, 2.7, 2.7, 2.7, 3.0, 2.7])
+
+# low pass filter parameters
+x_vel_old = 0.0
+yaw_vel_old = 0.0
+body_h_old = 0.12
 
 # csv logger init
 csv_path = '../../log_tmp/traj_record_1.csv'
@@ -185,17 +215,14 @@ with h5py.File(mat_file_path, 'r') as file:
     # prepare grid 
     grid_d = (grid_max - grid_min) / grid_n
 
+    # timer callback to interact with low-level quadruped robot
+    low_level_callback()
 
 # main loop
 try:
     while True:
         # check lcm call back in loop, update states
         lc.handle()
-
-        # update state with state estimation value
-        rbt_state[0] = 1.0
-        rbt_state[1] = 1.0
-        rbt_state[2] = math.pi/2
 
         # get state index
         state_index_f = (rbt_state - grid_min) / grid_d
@@ -236,16 +263,21 @@ try:
         print("opti_ctr - {0:.3f}, opti_mode - {1:d}".format(opti_ctr, opti_mode))
 
         # for csv logging
-        mode_r = opti_mode
-        ctr_r = opti_ctr
+        global_opti_mode = opti_mode
+        global_opti_ctr = opti_ctr
 
         # set walking mode and paras based on opti mode
         if opti_mode == 0:
             opti_mode = 1
 
-        cmd_x_vel = x_vel_k_arr[opti_mode-1]*1.0
-        cmd_yaw_vel = omega_k_arr[opti_mode-1]*opti_ctr
-        cmd_height = height_arr[opti_mode-1]
+        x_vel_n = x_vel_k_arr[opti_mode-1]*1.0
+        yaw_vel_n = omega_k_arr[opti_mode-1]*opti_ctr
+        body_h_n = height_arr[opti_mode-1]
+
+        cmd_x_vel = 0.7*x_vel_old + 0.3*x_vel_n
+        cmd_yaw_vel = 0.7*yaw_vel_old + 0.3*yaw_vel_n
+        cmd_height = 0.5*body_h_old + 0.5*body_h_n
+        
         cmd_ori_pitch = pitch_arr[opti_mode-1]
         cmd_ori_roll = roll_arr[opti_mode-1]
 
@@ -254,6 +286,10 @@ try:
         cmd_bound = bound_arr[opti_mode-1]
         cmd_duration = duration_arr[opti_mode-1]
         cmd_freq = freq_arr[opti_mode-1]
+
+        x_vel_old = x_vel_n
+        yaw_vel_old = yaw_vel_n
+        body_h_old = body_h_n
 
         
         # check if reach the target set
@@ -266,15 +302,7 @@ try:
 
         # ~200hz in loop
         #time.sleep(0.05)
-            
-        # save to csv
-        csv_row = "{0:d},{1:.6f},{2:.6f},{3:.6f},{4:.6f},{5:.6f},{6:.6f},{7:.6f}".format(opti_mode,cmd_yaw_vel,
-                                                                                         global_xyz[0],global_xyz[1],global_xyz[2],
-                                                                                         global_rpy[0],global_rpy[1],global_rpy[2])
-        lgr.info(csv_row)
-
-        print('\n')
-
+        
 
 
 except KeyboardInterrupt:
