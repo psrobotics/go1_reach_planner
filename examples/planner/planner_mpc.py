@@ -1,5 +1,5 @@
 import sys
-sys.path.append(['../', '../../deps/unitree_legged_sdk/lib/python/amd64'])
+sys.path.append('../../')
 
 #import sys
 #sys.path.extend(['/path/to/subfolder1', '/path/to/subfolder2'])
@@ -14,10 +14,10 @@ import time
 
 # lcm init
 import lcm
-from lcm_type.exlcm import motion_t
+from examples.lcm_type.exlcm import motion_t
 
 # unitree sdk
-import robot_interface as sdk
+import deps.unitree_legged_sdk.lib.python.amd64.robot_interface as sdk
 
 import scipy.io
 import h5py
@@ -170,7 +170,7 @@ lgr.critical('New Traj Sample Start From Here')
 
 
 # .mat file setup
-mat_file_path = "../../mat_file/quad_reachavoid_j_1.mat"
+mat_file_path = "../../../mat_file/quad_reachavoid_j_1.mat"
 print('reading mat file')
 with h5py.File(mat_file_path, 'r') as file:
     # list all variable keys
