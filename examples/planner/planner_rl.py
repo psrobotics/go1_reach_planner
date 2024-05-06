@@ -22,9 +22,10 @@ import logging
 
 import threading
 
+
 def low_level_callback():
     
-    #print (time.ctime())
+    print (time.ctime())
     # send to socket
     low_command = np.array([cmd_x_vel, cmd_y_vel, cmd_yaw_vel,
                             cmd_height, cmd_freq, cmd_phase, cmd_offset, cmd_bound, cmd_duration, cmd_footswing,
@@ -41,7 +42,7 @@ def low_level_callback():
     lgr.info(csv_row)
     
     # 100hz callback 0.025
-    threading.Timer(0.023, low_level_callback).start()
+    threading.Timer(0.025, low_level_callback).start()
 
 
 # Send a UDP message to the specified IP address and port, low-level controller
@@ -72,6 +73,7 @@ def quaternion_to_rpy(quaternion):
     
 # lcm handle function, update state variables, get the log here
 def lcm_handler(channel, data):
+
     msg = motion_t.decode(data)
     print("   Received message on channel \"%s\"" % channel)
     print("   timestamp   = %s" % str(msg.timestamp))
@@ -83,12 +85,13 @@ def lcm_handler(channel, data):
     print("")
 
     [roll, pitch, yaw] = quaternion_to_rpy(msg.orientation)
-    print("roll - {0:.5f}, pitch - {0:.5f}, yaw - {0:.5f} \n".format(roll, pitch, yaw))
+    print("roll - {0:.5f}, pitch - {1:.5f}, yaw - {2:.5f} \n".format(roll, pitch, yaw))
 
     # we use global variable here
-    rbt_state[0] = msg.position[0] + state_offset[0] # x
-    rbt_state[1] = msg.position[1] + state_offset[1] # y
-    rbt_state[2] = yaw + state_offset[2] # yaw
+    rbt_state[0] = 1*msg.position[0] + state_offset[0] 
+    rbt_state[1] = 1*msg.position[1] + state_offset[1] 
+
+    rbt_state[2] = (yaw+state_offset[2] + math.pi) % (2 * math.pi) - math.pi
 
     # update global variables for logging, some overlaid with offset
     global_xyz[0] = rbt_state[0]
@@ -99,9 +102,11 @@ def lcm_handler(channel, data):
     global_rpy[2] = rbt_state[2]
 
 # setup lcm
+
 lc = lcm.LCM()
 subscription = lc.subscribe("VICON_LCM", lcm_handler)
 print("lcm init done!")
+
 
 # setup socket
 ip = "192.168.123.15"  # destination IP of the jetson NX onboard
@@ -127,7 +132,7 @@ cmd_stance_length = 0.40 # fpp len
 # mat states
 rbt_state = np.zeros(3)
 # state offset, x y yaw
-state_offset = np.array([3.80, -4.00, -1.98])
+state_offset = np.array([4.00-0.2, 4.00+0.4, 2.75])
 # state index
 state_index_f = np.array([0, 0, 0])
 # target set thres, set to 0.7
@@ -146,7 +151,7 @@ omega_k_arr  = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 0.7, 0.6, 0.2])
 # forward velocity k
 x_vel_k_arr  = np.array([1.0, 0.8, 0.6, 0.4, 0.2, 1.0, 0.5, 3.0])
 # body gait state
-height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, -0.22, 0.3])
+height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, -0.30, 0.3])
 pitch_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 roll_arr     = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
@@ -154,7 +159,7 @@ phase_arr    = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0])
 offset_arr   = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 bound_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 duration_arr = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-freq_arr     = np.array([2.4, 2.4, 2.7, 2.7, 2.7, 2.7, 3.0, 2.7])
+freq_arr     = np.array([3.0, 3.0, 3.0, 3.0, 3.0, 2.7, 3.0, 2.7])
 
 # low pass filter parameters
 x_vel_old = 0.0
@@ -162,7 +167,7 @@ yaw_vel_old = 0.0
 body_h_old = 0.12
 
 # csv logger init
-csv_path = '../../log_tmp/traj_record_1.csv'
+csv_path = '../../log_tmp/traj_record_1_rl.csv'
 # logger init
 # create logger
 lgr = logging.getLogger('quad_logger')
@@ -180,7 +185,7 @@ lgr.critical('New Traj Sample Start From Here')
 
 
 # .mat file setup
-mat_file_path = "../../../mat_file/quad_reachavoid_j_1.mat"
+mat_file_path = "../../../mat_file/quad_reachavoid_j_2.mat"
 print('reading mat file')
 with h5py.File(mat_file_path, 'r') as file:
     # list all variable keys
@@ -218,10 +223,14 @@ with h5py.File(mat_file_path, 'r') as file:
     # timer callback to interact with low-level quadruped robot
     low_level_callback()
 
+    lc_counter = 0
+
+
 # main loop
 try:
     while True:
         # check lcm call back in loop, update states
+
         lc.handle()
 
         # get state index
@@ -274,8 +283,8 @@ try:
         yaw_vel_n = omega_k_arr[opti_mode-1]*opti_ctr
         body_h_n = height_arr[opti_mode-1]
 
-        cmd_x_vel = 0.7*x_vel_old + 0.3*x_vel_n
-        cmd_yaw_vel = 0.7*yaw_vel_old + 0.3*yaw_vel_n
+        cmd_x_vel = (0.5*x_vel_old + 0.5*x_vel_n)*1.0
+        cmd_yaw_vel = (0.7*yaw_vel_old + 0.3*yaw_vel_n)*0.95 # 0.6 is the k for heading angle
         cmd_height = 0.5*body_h_old + 0.5*body_h_n
         
         cmd_ori_pitch = pitch_arr[opti_mode-1]

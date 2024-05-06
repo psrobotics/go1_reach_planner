@@ -80,12 +80,18 @@ def lcm_handler(channel, data):
     print("")
 
     [roll, pitch, yaw] = quaternion_to_rpy(msg.orientation)
-    print("roll - {0:.5f}, pitch - {0:.5f}, yaw - {0:.5f} \n".format(roll, pitch, yaw))
+    print("roll - {0:.5f}, pitch - {1:.5f}, yaw - {2:.5f} \n".format(roll, pitch, yaw))
 
     # we use global variable here
-    rbt_state[0] = msg.position[0] + state_offset[0] # x
-    rbt_state[1] = msg.position[1] + state_offset[1] # y
-    rbt_state[2] = yaw + state_offset[2] # yaw
+    #rbt_state[0] = msg.position[0] + state_offset[0] # x
+    #rbt_state[1] = msg.position[1] + state_offset[1] # y
+    #rbt_state[2] = yaw + state_offset[2] # yaw
+
+    # we use global variable here
+    rbt_state[0] = 1*msg.position[0] + state_offset[0] 
+    rbt_state[1] = 1*msg.position[1] + state_offset[1] 
+
+    rbt_state[2] = (yaw+state_offset[2] + math.pi) % (2 * math.pi) - math.pi
 
     # update global variables for logging, some overlaid with offset
     global_xyz[0] = rbt_state[0]
@@ -141,7 +147,7 @@ cmd.reserve = 0
 # mat states
 rbt_state = np.zeros(3)
 # state offset, x y yaw
-state_offset = np.array([3.80, -4.00, -1.98])
+state_offset = np.array([4.00-0.2, 4.00+0.4, 2.75])
 # state index
 state_index_f = np.array([0, 0, 0])
 # target set thres, set to 0.7
@@ -160,7 +166,7 @@ omega_k_arr  = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 0.7, 0.6, 0.2])
 # forward velocity k
 x_vel_k_arr  = np.array([1.0, 0.8, 0.6, 0.4, 0.2, 1.0, 0.5, 3.0])
 # body gait state
-height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, -0.22, 0.3])
+height_arr   = np.array([0.0, 0.0, 0.0, 0.0, 0.0, -0.1, -0.22, 0.0])
 pitch_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 roll_arr     = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
@@ -170,13 +176,15 @@ bound_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 duration_arr = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
 freq_arr     = np.array([2.4, 2.4, 2.7, 2.7, 2.7, 2.7, 3.0, 2.7])
 
+gait_arr = np.array([2, 2, 2, 2, 2, 3, 1, 2])
+
 # low pass filter parameters
 x_vel_old = 0.0
 yaw_vel_old = 0.0
 body_h_old = 0.12
 
 # csv logger init
-csv_path = '../../log_tmp/traj_record_1.csv'
+csv_path = '../../log_tmp/traj_record_1_mpc.csv'
 # logger init
 # create logger
 lgr = logging.getLogger('quad_logger')
@@ -194,7 +202,7 @@ lgr.critical('New Traj Sample Start From Here')
 
 
 # .mat file setup
-mat_file_path = "../../../mat_file/quad_reachavoid_j_1.mat"
+mat_file_path = "../../../mat_file/quad_reachavoid_j_2.mat"
 print('reading mat file')
 with h5py.File(mat_file_path, 'r') as file:
     # list all variable keys
@@ -289,11 +297,11 @@ try:
             opti_mode = 1
 
         x_vel_n = x_vel_k_arr[opti_mode-1]*1.0
-        yaw_vel_n = omega_k_arr[opti_mode-1]*opti_ctr
+        yaw_vel_n = omega_k_arr[opti_mode-1]*opti_ctr*0.7 # 0.7 is the turning adjust para
         body_h_n = height_arr[opti_mode-1]
 
-        cmd.mode = 2
-        cmd.gaitType = 2
+        cmd.mode = 2 #vel ctr
+        cmd.gaitType = gait_arr[opti_mode-1]
         cmd.velocity = [0.7*x_vel_old + 0.3*x_vel_n, 0] # -1  ~ +1
         cmd.yawSpeed = 0.7*yaw_vel_old + 0.3*yaw_vel_n
         cmd.bodyHeight = 0.5*body_h_old + 0.5*body_h_n

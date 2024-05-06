@@ -25,10 +25,13 @@ add_definitions(
   -D_BUILD_STATIC_LIB
 )
 
-# lcm
+# add lcm
 find_package(lcm REQUIRED)
-
+# add eigen
 find_package(Eigen3 REQUIRED)
+# add realsense package
+find_package(realsense2 REQUIRED)
+
 
 set(VICON_SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/vicon-datastream-sdk/)
 set(QUALISYS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/qualisys_cpp_sdk/)
@@ -244,14 +247,24 @@ if (LIBMOTIONCAPTURE_BUILD_PYTHON_BINDINGS)
 endif()
 
 if (LIBMOTIONCAPTURE_BUILD_EXAMPLE)
-  add_executable(motioncapture_example
-    examples/vicon_sender/vicon_sender.cpp
+  add_executable(vicon_node
+    examples/vicon_node/vicon_main.cpp
   )
   # add lcm
-  target_link_libraries(motioncapture_example
+  target_link_libraries(vicon_node
     libmotioncapture
     ${LCM_NAMESPACE}lcm
   )
+
+# add realsense node
+add_executable(realsense_t265_node
+  examples/t265_node/t265_main.cpp
+)
+# link librealsense2 to the target
+target_link_libraries(realsense_t265_node
+  ${realsense2_LIBRARY}
+  ${LCM_NAMESPACE}lcm
+)
 
 endif()
 
