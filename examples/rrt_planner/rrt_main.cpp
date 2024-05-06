@@ -1,29 +1,59 @@
-/**
- *  MIT License
- *
- *  Copyright (c) 2019 Yuya Kudo
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
- */
-
 #include "rrt_main.h"
+
+#include <stdio.h>
+#include <iostream>
+#include <cmath>
+#include <lcm/lcm-cpp.hpp>
+#include "lidar_raw.hpp"
+#include "obst_map.hpp"
+
+#define LIDAR_BUFFER_SIZE 1500
+
+#define GRID_X_SIZE 200
+#define GRID_X_M 10 // in m
+#define GRID_Y_SIZE 200
+#define GRID_Y_M 10 // in m
+#define LIDAR_DIST_MAX 9500 // in mm
+#define OBST_FILL 40 // in mm
+#define CONVERT_STEP 15
+
 namespace pln = planner;
+
+class obst_map_handler 
+{
+    public:
+
+    // lidar data array
+    bool obst_map[GRID_X_SIZE][GRID_Y_SIZE];
+
+
+        obst_map_handler() {}
+
+        ~obst_map_handler() {}
+
+        void handleMessage(const lcm::ReceiveBuffer* rbuf,
+                const std::string& chan, 
+                const exlcm::obst_map* msg);
+
+    private:
+
+};
+
+void obst_map_handler::handleMessage(const lcm::ReceiveBuffer* rbuf,
+                const std::string& chan, 
+                const exlcm::obst_map* msg)
+{
+    printf("Received message on channel \"%s\":\n", chan.c_str());
+    printf("  timestamp   = %lld\n", (long long)msg->timestamp);
+    printf("  enabled     = %d\n", msg->enabled);
+
+    // copy in obst mask
+    for (int i = 0; i < GRID_X_SIZE; i++) 
+        for (int j = 0; j < GRID_X_SIZE; j++)
+                obst_map[i][j] = msg->obst_map[i][j];
+}
+
+
 
 int main() {
   const int DIM = 2;
@@ -197,19 +227,68 @@ int main() {
         break;
       }
 
-      planner->setProblemDefinition(constraint);
+
+    lcm::LCM lcm;
+    if(!lcm.good())
+        return 1;
+    std::cout<<"lcm init done\n"<<std::endl;
+
+    obst_map_handler *handlerObject = new obst_map_handler();
+    lcm.subscribe("OBST_MAP", &obst_map_handler::handleMessage, handlerObject);
+
+    while(0 == lcm.handle())
+    {
+
+        // visualize
+        cv::Mat world = cv::Mat::zeros(cv::Size(world_size.x, world_size.y), CV_8UC1);
+        cv::cvtColor(world, world, cv::COLOR_BGR2RGB);
+
+
+        std::cout<<"rrt loop"<<std::endl;
+
+        // definition of obstacle (point cloud type)
+        std::vector<pln::PointCloudConstraint::Hypersphere> obstacles_r;
+
+        for (int i = GRID_X_SIZE/2-200; i < GRID_X_SIZE/2+200; i++) 
+        {
+            for (int j = GRID_Y_SIZE/2-GRID_Y_SIZE/4; j < GRID_Y_SIZE/2+GRID_Y_SIZE/4; j++)
+            {
+              if(handlerObject->obst_map[i][j]==1)
+              {
+                double p_obst_x = i/double(GRID_X_SIZE)*world_size.x;
+                double p_obst_y = j/double(GRID_Y_SIZE)*world_size.y;
+                obstacles_r.emplace_back(pln::State(p_obst_x, p_obst_y),  1.0); // x : 10.0, y : 20.0, radius : 10.0
+              }
+            }
+        }
+
+
+      pln::EuclideanSpace space(DIM);
+      std::vector<pln::Bound> bounds{pln::Bound(0, world.cols), pln::Bound(0, world.rows)};
+      space.setBound(bounds);
+
+      // definition of constraint using std::shared_ptr
+      auto constraint_updated = std::make_shared<pln::PointCloudConstraint>(space, obstacles_r);
+      std::cout<<"obst init done\n"<<std::endl;
+
+      //-- draw set of circle to world img
+      for (const auto &obstacles_r : static_cast<pln::PointCloudConstraint *>(constraint_updated.get())->getRef()) {
+        cv::circle(world, cv::Point(obstacles_r.getState().vals[0], obstacles_r.getState().vals[1]),
+                    obstacles_r.getRadius(), 0xFF, -1, cv::LINE_AA);
+      }
+
+      planner->setProblemDefinition(constraint_updated);
       planner->setTerminateSearchCost(terminate_search_cost);
 
       auto start_time = std::chrono::system_clock::now();
       bool status = planner->solve(start, goal);
       auto end_time = std::chrono::system_clock::now();
 
-      if (status) {
+      if (status) 
+      {
         // draw and output result
         auto node_list = planner->getNodeList();
         auto result = planner->getResult();
-
-        cv::cvtColor(world, world, cv::COLOR_BGR2RGB);
 
         for (int yi = 0; yi < world.rows; yi++) {
           for (int xi = 0; xi < world.cols; xi++) {
@@ -250,22 +329,32 @@ int main() {
 
         cv::namedWindow("world", cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
         cv::imshow("world", world);
-        cv::waitKey(0);
-        cv::destroyWindow("world");
-        cv::imwrite("./result.png", world);
+        cv::waitKey(1);
+
+        //cv::destroyWindow("world");
 
         std::cout << "total cost : " << planner->getResultCost() << std::endl;
-      } else {
+      } 
+      else 
+      {
         std::cout << "Could not find path" << std::endl;
       }
+
+
 
       std::cout << "elapsed time : "
                 << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() / 1000.0 << "ms"
                 << std::endl
                 << std::endl;
     }
-  } catch (const std::exception &e) {
+    }
+  
+  } 
+  catch (const std::exception &e) 
+  {
     std::cout << e.what() << std::endl;
     exit(1);
   }
 }
+
+

@@ -1,0 +1,10 @@
+package exlcm;
+
+struct obst_map
+{
+    int64_t  timestamp;
+    boolean  enabled;
+    double  size_x;
+    double  size_y;
+    boolean  obst_map[200][200];
+}

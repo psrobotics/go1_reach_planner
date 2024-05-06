@@ -303,6 +303,23 @@ target_link_libraries(rplidar_to_obst
   ${LCM_NAMESPACE}lcm
 )
 
+# lidar visualize
+include_directories(
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  )
+
+add_executable(lidar_visualize
+  examples/lidar_node/lidar_visualize.cpp
+)
+# link librealsense2 to the target
+target_link_libraries(lidar_visualize
+  ${LCM_NAMESPACE}lcm
+  ${OpenCV_LIBS}
+  ${EIGEN3_LIBS}
+)
+
+
 
 # rrt node
 set(RRT_LIBRARIES_DIR "deps/rrt_sdk")

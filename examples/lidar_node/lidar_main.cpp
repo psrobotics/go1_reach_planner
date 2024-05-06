@@ -297,11 +297,13 @@ int main(int argc, const char * argv[]) {
                 lidar_raw_msg.dist[pos] = nodes[pos].dist_mm_q2/4.0f;
                 lidar_raw_msg.quality[pos] = nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT;
 
+                
                 printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
                     (nodes[pos].flag & SL_LIDAR_RESP_HQ_FLAG_SYNCBIT) ?"S ":"  ", 
                     lidar_raw_msg.angle[pos],
                     lidar_raw_msg.dist[pos],
                     lidar_raw_msg.quality[pos]);
+                
                 //printf("%ld\n",count);
             }
 
