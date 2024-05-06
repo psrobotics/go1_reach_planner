@@ -1,0 +1,11 @@
+package exlcm;
+
+struct lidar_raw
+{
+    int64_t  timestamp;
+    boolean  enabled;
+    int64_t  count;
+    double  angle[1400];
+    double  dist[1400];
+    int8_t  quality[1400];
+}

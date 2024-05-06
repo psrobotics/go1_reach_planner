@@ -294,6 +294,15 @@ target_include_directories(rplidar_publisher
   examples/lidar_node/sdk/src
 )
 
+# lidar to obst map
+add_executable(rplidar_to_obst
+  examples/lidar_node/lidar_to_map.cpp
+)
+# link librealsense2 to the target
+target_link_libraries(rplidar_to_obst
+  ${LCM_NAMESPACE}lcm
+)
+
 
 # rrt node
 set(RRT_LIBRARIES_DIR "deps/rrt_sdk")

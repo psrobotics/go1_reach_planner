@@ -6,31 +6,26 @@
  *  http://www.robopeak.com
  *  Copyright (c) 2014 - 2020 Shanghai Slamtec Co., Ltd.
  *  http://www.slamtec.com
+ * 
+ *  modified 0501 shuang
  *
  */
-/*
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <iostream>
 
 #include "sl_lidar.h" 
 #include "sl_lidar_driver.h"
+
+// lcm
+#include <lcm/lcm-cpp.hpp>
+#include "lidar_raw.hpp"
+
+
 #ifndef _countof
 #define _countof(_Array) (int)(sizeof(_Array) / sizeof(_Array[0]))
 #endif
@@ -105,6 +100,21 @@ int main(int argc, const char * argv[]) {
 	bool useArgcBaudrate = false;
 
     IChannel* _channel;
+
+    // Init the lcm server 
+    // https://lcm-proj.github.io/lcm/content/tutorial-cpp.html
+    lcm::LCM lcm;
+    if(!lcm.good())
+    {
+        std::cout << "lcm init failed" << std::endl;
+        std::terminate();
+    }
+    else
+        std::cout << "lcm init done!" << std::endl;
+
+    // init a lcm type for lidar raw info passthrough
+    exlcm::lidar_raw lidar_raw_msg;
+
 
     printf("Ultra simple LIDAR data grabber for SLAMTEC LIDAR.\n"
            "Version: %s\n", SL_LIDAR_SDK_VERSION);
@@ -258,6 +268,8 @@ int main(int argc, const char * argv[]) {
         goto on_finished;
     }
 
+
+
     signal(SIGINT, ctrlc);
     
 	if(opt_channel_type == CHANNEL_TYPE_SERIALPORT)
@@ -272,15 +284,30 @@ int main(int argc, const char * argv[]) {
 
         op_result = drv->grabScanDataHq(nodes, count);
 
-        if (SL_IS_OK(op_result)) {
+        if (SL_IS_OK(op_result)) 
+        {
             drv->ascendScanData(nodes, count);
-            for (int pos = 0; pos < (int)count ; ++pos) {
+            // fill in lcm data, lcm max buffer = 1500
+            lidar_raw_msg.enabled = true;
+            lidar_raw_msg.count = count;
+
+            for (int pos = 0; pos < (int)count ; ++pos) 
+            {
+                lidar_raw_msg.angle[pos] = (nodes[pos].angle_z_q14 * 90.f) / 16384.f;
+                lidar_raw_msg.dist[pos] = nodes[pos].dist_mm_q2/4.0f;
+                lidar_raw_msg.quality[pos] = nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT;
+
                 printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
                     (nodes[pos].flag & SL_LIDAR_RESP_HQ_FLAG_SYNCBIT) ?"S ":"  ", 
-                    (nodes[pos].angle_z_q14 * 90.f) / 16384.f,
-                    nodes[pos].dist_mm_q2/4.0f,
-                    nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT);
+                    lidar_raw_msg.angle[pos],
+                    lidar_raw_msg.dist[pos],
+                    lidar_raw_msg.quality[pos]);
+                //printf("%ld\n",count);
             }
+
+            // send lcm info to lidar raw
+            lcm.publish("LIDAR_RAW", &lidar_raw_msg);
+            std::cout<<"lcm message published"<<std::endl;
         }
 
         if (ctrl_c_pressed){ 
