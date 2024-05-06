@@ -266,5 +266,29 @@ target_link_libraries(realsense_t265_node
   ${LCM_NAMESPACE}lcm
 )
 
+
+# rplidar node
+file(GLOB_RECURSE LIDAR_SOURCES
+    examples/lidar_node/sdk/src/*.cpp
+    examples/lidar_node/sdk/src/**/*.cpp
+    examples/lidar_node/sdk/src/**/**/*.cpp
+    #examples/lidar_node/sdk/src/**/**/**/*.cpp
+)
+add_executable(rplidar_publisher
+  ${LIDAR_SOURCES}
+  examples/lidar_node/lidar_main.cpp
+)
+# link librealsense2 to the target
+target_link_libraries(rplidar_publisher
+  ${LCM_NAMESPACE}lcm
+  stdc++
+  pthread
+)
+target_include_directories(rplidar_publisher
+  PUBLIC
+  examples/lidar_node/sdk/include
+  examples/lidar_node/sdk/src
+)
+
 endif()
 
