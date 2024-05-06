@@ -1,0 +1,72 @@
+[
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/State/State.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/State/State.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/State/State.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/EuclideanSpace/EuclideanSpace.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/EuclideanSpace/EuclideanSpace.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/EuclideanSpace/EuclideanSpace.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Constraint/ConstraintBase.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/ConstraintBase.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/ConstraintBase.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Constraint/GridConstraint/GridConstraint.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/GridConstraint/GridConstraint.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/GridConstraint/GridConstraint.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Constraint/PointCloudConstraint/PointCloudConstraint.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/PointCloudConstraint/PointCloudConstraint.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Constraint/PointCloudConstraint/PointCloudConstraint.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Sampler/Sampler.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Sampler/Sampler.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Sampler/Sampler.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Node/Node.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/Node.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/Node.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Node/NodeListBase.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/NodeListBase.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/NodeListBase.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Node/SimpleNodeList/SimpleNodeList.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/SimpleNodeList/SimpleNodeList.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/SimpleNodeList/SimpleNodeList.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Node/KDTreeNodeList/KDTreeNodeList.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/KDTreeNodeList/KDTreeNodeList.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Node/KDTreeNodeList/KDTreeNodeList.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Planner/PlannerBase.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/PlannerBase.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/PlannerBase.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Planner/RRT/RRT.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/RRT/RRT.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/RRT/RRT.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Planner/RRTStar/RRTStar.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/RRTStar/RRTStar.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/RRTStar/RRTStar.cpp"
+},
+{
+  "directory": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/build",
+  "command": "/usr/bin/c++  -DCOMPILEDWITHC14 -Dplanner_EXPORTS -I/home/ps/projects/go1_reach_planner/deps/rrt_sdk/include -I/usr/include/eigen3   -Wall -O2 -march=native -std=c++14 -O3 -DNDEBUG -fPIC   -o CMakeFiles/planner.dir/src/Planner/InformedRRTStar/InformedRRTStar.cpp.o -c /home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/InformedRRTStar/InformedRRTStar.cpp",
+  "file": "/home/ps/projects/go1_reach_planner/deps/rrt_sdk/src/Planner/InformedRRTStar/InformedRRTStar.cpp"
+}
+]

@@ -31,7 +31,11 @@ find_package(lcm REQUIRED)
 find_package(Eigen3 REQUIRED)
 # add realsense package
 find_package(realsense2 REQUIRED)
-
+# opencv
+find_package(OpenCV REQUIRED)
+if(NOT OpenCV_FOUND)
+  message(FATAL_ERROR "OpenCV > 3.0 not found.")
+endif()
 
 set(VICON_SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/vicon-datastream-sdk/)
 set(QUALISYS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/qualisys_cpp_sdk/)
@@ -289,6 +293,32 @@ target_include_directories(rplidar_publisher
   examples/lidar_node/sdk/include
   examples/lidar_node/sdk/src
 )
+
+
+# rrt node
+set(RRT_LIBRARIES_DIR "deps/rrt_sdk")
+
+include_directories(
+  examples/rrt_planner
+  ${RRT_LIBRARIES_DIR}/include
+  examples/rrt_planner/OpenCV-YAMLHelper/include
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  )
+
+link_directories(
+  ${RRT_LIBRARIES_DIR}/build)
+
+add_executable(rrt_node
+  examples/rrt_planner/rrt_main.cpp
+  )
+
+target_link_libraries(rrt_node
+  ${EIGEN3_LIBS}
+  ${OpenCV_LIBS}
+  ${LCM_NAMESPACE}lcm
+  planner
+  )
 
 endif()
 
