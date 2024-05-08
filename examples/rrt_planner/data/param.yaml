@@ -1,102 +1,36 @@
 %YAML:1.2
 ---
 RRT:
-  max_sampling_num:   10000
-  goal_sampling_rate: 0.05
-  expand_dist:        30.0
+  max_sampling_num:   800  # ori 10000
+  goal_sampling_rate: 0.10
+  expand_dist:        50.0
 
 RRTStar:
-  max_sampling_num:   10000
+  max_sampling_num:   1000
   goal_sampling_rate: 0.25
-  expand_dist:        500
+  expand_dist:        50
   R:                  2500
 
 InformedRRTStar:
-  max_sampling_num:   10000
+  max_sampling_num:   1000
   goal_sampling_rate: 0.25
-  expand_dist:        500
+  expand_dist:        50
   R:                  2500
   goal_region_radius: 100.0
 
 StartState:
-  x: 400
-  y: 400
+  x: 800
+  y: 800
 
 GoalState:
-  x: 510
-  y: 400
+  x: 1100 #1200
+  y: 800
 
 WorldSize:
-  x: 800.0
-  y: 800.0
+  x: 1600.0
+  y: 1600.0
 
 ImageTerminateSearchCost: 2980
 ConstraintImage: "./constraint1.png"
 
 ObstaclesTerminateSearchCost: 1330
-Obstacles:
-  num: 16
-  Obstacle0:
-    x:      350.0
-    y:      300.0
-    radius: 80.0
-  Obstacle1:
-    x:      789.0
-    y:      680.0
-    radius: 80.0
-  Obstacle2:
-    x:      550.0
-    y:      450.0
-    radius: 100.0
-  Obstacle3:
-    x:      400.0
-    y:      500.0
-    radius: 50.0
-  Obstacle4:
-    x:      900.0
-    y:      800.0
-    radius: 60.0
-  Obstacle5:
-    x:      100.0
-    y:      500.0
-    radius: 50.0
-  Obstacle6:
-    x:      600.0
-    y:      300.0
-    radius: 70.0
-  Obstacle7:
-    x:      600.0
-    y:      680.0
-    radius: 100.0
-  Obstacle8:
-    x:      140.0
-    y:      140.0
-    radius: 80.0
-  Obstacle9:
-    x:      609.0
-    y:      93.0
-    radius: 90.0
-  Obstacle10:
-    x:      300.0
-    y:      100.0
-    radius: 50.0
-  Obstacle11:
-    x:      100.0
-    y:      300.0
-    radius: 100.0
-  Obstacle12:
-    x:      720.0
-    y:      902.0
-    radius: 60.0
-  Obstacle13:
-    x:      450.0
-    y:      209.0
-    radius: 79.0
-  Obstacle14:
-    x:      580.0
-    y:      910.0
-    radius: 20.0
-  Obstacle15:
-    x:      409.0
-    y:      690.0
-    radius: 60.0

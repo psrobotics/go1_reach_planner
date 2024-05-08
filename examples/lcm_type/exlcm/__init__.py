@@ -4,3 +4,4 @@ DO NOT MODIFY BY HAND!!!!
 """
 
 from .motion_t import motion_t
+from .twist import twist

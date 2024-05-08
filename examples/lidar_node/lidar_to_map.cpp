@@ -16,6 +16,7 @@
 #define LIDAR_DIST_MAX 9500 // in mm
 #define OBST_FILL 40 // in mm
 #define CONVERT_STEP 15
+#define OBST_WALL_THICKNESS 200
 
 
 
@@ -103,32 +104,34 @@ void lidar_raw_handler::handleMessage(const lcm::ReceiveBuffer* rbuf,
     // convert lidar to obst map
     for(int i=0; i<count; i++)
     {
-        // current dist
-        if(msg->quality[i]>40)
+        // current dist, we only use good quality scan
+        if(msg->quality[i] > 40)
         {
-        double _d = 0;
-        for (_d = msg->dist[i]; _d<LIDAR_DIST_MAX; _d+=CONVERT_STEP)
-        {
-            double _rad_n = deg_to_rad(msg->angle[i]);
-            double _x = _d * cos(_rad_n);
-            double _y = _d * sin(_rad_n);
+            double _d = 0;
+            //for (_d = msg->dist[i]; _d<LIDAR_DIST_MAX; _d+=CONVERT_STEP)
+            // assume thin wall
+            for (_d = msg->dist[i]; _d<msg->dist[i]+OBST_WALL_THICKNESS; _d+=CONVERT_STEP)
+            {
+                double _rad_n = deg_to_rad(msg->angle[i]);
+                double _x = _d * cos(_rad_n);
+                double _y = _d * sin(_rad_n);
 
-            int _x_i = int(_x/1000.0/GRID_X_M * GRID_X_SIZE + GRID_X_SIZE/2);
-            int _y_i = int(_y/1000.0/GRID_Y_M * GRID_Y_SIZE + GRID_Y_SIZE/2);
+                int _x_i = int(_x/1000.0/GRID_X_M * GRID_X_SIZE + GRID_X_SIZE/2);
+                int _y_i = int(_y/1000.0/GRID_Y_M * GRID_Y_SIZE + GRID_Y_SIZE/2);
 
-            if(_x_i < 0)
-                _x_i = 0;
-            else if(_x_i > GRID_X_SIZE - 1)
-                _x_i = GRID_X_SIZE - 1;
+                if(_x_i < 0)
+                    _x_i = 0;
+                else if(_x_i > GRID_X_SIZE - 1)
+                    _x_i = GRID_X_SIZE - 1;
 
-            if(_y_i < 0)
-                _y_i = 0;
-            else if(_y_i > GRID_Y_SIZE - 1)
-                _y_i = GRID_Y_SIZE - 1;
+                if(_y_i < 0)
+                    _y_i = 0;
+                else if(_y_i > GRID_Y_SIZE - 1)
+                    _y_i = GRID_Y_SIZE - 1;
 
-            obst_map[_x_i][_y_i] = 1;
-            obst_map_msg.obst_map[_x_i][_y_i] = 1;
-        }
+                obst_map[_x_i][_y_i] = 1;
+                obst_map_msg.obst_map[_x_i][_y_i] = 1;
+            }
         }
     }
 

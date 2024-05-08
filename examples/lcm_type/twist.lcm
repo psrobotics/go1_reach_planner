@@ -1,0 +1,13 @@
+package exlcm;
+
+struct twist
+{
+    int64_t  timestamp;
+    boolean  enabled;
+    double v_x;
+    double v_y;
+    double v_z;
+    double v_roll;
+    double v_pitch;
+    double v_yaw;
+}

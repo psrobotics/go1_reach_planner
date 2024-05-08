@@ -123,3 +123,7 @@ change `sys.path.append('../lib/python/amd64')` to `sys.path.append('../lib/pyth
 cd build
 sudo ./motioncapture_example vicon 192.168.1.39
 ```
+
+```
+sudo ./rplidar_publisher --channel --serial /dev/ttyUSB0 256000
+```
