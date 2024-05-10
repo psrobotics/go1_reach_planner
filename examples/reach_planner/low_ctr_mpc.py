@@ -37,7 +37,7 @@ def low_level_callback():
     csv_row = "{0:.6f},{1:.6f}".format(cmd.velocity[0], cmd.yawSpeed)
 
     lgr.info(csv_row)
-    print("low level command sent\n")
+    #print("low level command sent\n")
     
     # 100hz callback 0.025
     threading.Timer(0.023, low_level_callback).start()
@@ -59,9 +59,18 @@ def lcm_handler(channel, data):
     print("")
 
     # set simple twist velocity
-    cmd.velocity[0] = msg.v_x
-    cmd.yawSpeed = msg.v_yaw
-
+    #cmd.velocity = [1.1, 0.0]
+    #cmd.yawSpeed = 9.0*msg.v_yaw
+    if msg.v_x is not None and msg.v_yaw is not None:
+        cmd.velocity = [msg.v_x, 0.0]
+        cmd.yawSpeed = msg.v_yaw
+        if cmd.yawSpeed > 2.7:
+            cmd.yawSpeed = 2.7
+        elif cmd.yawSpeed < -2.7:
+            cmd.yawSpeed = -2.7
+        cmd.mode = 2 #vel ctr
+        cmd.gaitType = 2
+    
 
 # setup lcm
 lc = lcm.LCM()
@@ -97,9 +106,9 @@ print("low level mpc socket init done!")
 #cmd_stance_length = 0.40 # fpp len
 
 # shared global command
-cmd.mode = 1     # 0:idle, default stand      1:forced stand     2:walk continuously
+cmd.mode = 2     # 0:idle, default stand      1:forced stand     2:walk continuously
 cmd.gaitType = 0
-cmd.speedLevel = 0
+cmd.speedLevel = 1
 cmd.footRaiseHeight = 0
 cmd.bodyHeight = 0
 cmd.euler = [0, 0, 0]

@@ -147,7 +147,7 @@ cmd.reserve = 0
 # mat states
 rbt_state = np.zeros(3)
 # state offset, x y yaw
-state_offset = np.array([4.00-0.2, 4.00+0.4, 2.75])
+state_offset = np.array([4.00-0.2, 4.00+0.4, 0.992])
 # state index
 state_index_f = np.array([0, 0, 0])
 # target set thres, set to 0.7

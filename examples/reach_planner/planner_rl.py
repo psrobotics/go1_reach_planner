@@ -101,6 +101,8 @@ def lcm_handler(channel, data):
     global_rpy[1] = pitch
     global_rpy[2] = rbt_state[2]
 
+    print(rbt_state[2])
+
 # setup lcm
 
 lc = lcm.LCM()
@@ -132,7 +134,7 @@ cmd_stance_length = 0.40 # fpp len
 # mat states
 rbt_state = np.zeros(3)
 # state offset, x y yaw
-state_offset = np.array([4.00-0.2, 4.00+0.4, 2.75])
+state_offset = np.array([4.00-0.2, 4.00+0.4, 0.992])
 # state index
 state_index_f = np.array([0, 0, 0])
 # target set thres, set to 0.7
@@ -257,7 +259,7 @@ try:
             _t_e = math.ceil((_upper+_lower)/2)
             _i_t = _t_e
             v_dist_t = data_f[_i_t, state_index_i[2], state_index_i[1], state_index_i[0]]
-            if (v_dist_t > 0.001): # 0.001
+            if (v_dist_t > -0.001): # 0.001
                 _lower = _i_t
             else:
                 _upper = _i_t-1

@@ -84,11 +84,11 @@ int main()
     double turning_k = 0.6;
     double turning_vel = 0.0;
     double turning_vel_old= 0.0;
-    double x_vel = 1.0;
+    double x_vel = 0.5;
     double x_vel_old = 0.0;
 
-    double low_pass_a1 = 0.7;
-    double low_pass_a2 = 0.3;
+    double low_pass_a1 = 0.3;
+    double low_pass_a2 = 0.7;
 
     // setup rrt planner
     while (true)
@@ -179,7 +179,7 @@ int main()
             {
               double p_obst_x = i / double(GRID_X_SIZE) * world_size.x;
               double p_obst_y = j / double(GRID_Y_SIZE) * world_size.y;
-              obstacles_r.emplace_back(pln::State(p_obst_x, p_obst_y), 5.0); // x : 10.0, y : 20.0, radius : 10.0
+              obstacles_r.emplace_back(pln::State(p_obst_x, p_obst_y), 12.0); // x : 10.0, y : 20.0, radius : 10.0
             }
           }
         }
@@ -277,9 +277,9 @@ int main()
           cv::Mat world_resize;
           cv::resize(world, world_resize, cv::Size(800, 800));
 
-          cv::namedWindow("world", cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
-          cv::imshow("world", world_resize);
-          cv::waitKey(1);
+          //cv::namedWindow("world", cv::WINDOW_NORMAL | cv::WINDOW_KEEPRATIO);
+          //cv::imshow("world", world_resize);
+          //cv::waitKey(1);
 
           // cv::destroyWindow("world");
 
