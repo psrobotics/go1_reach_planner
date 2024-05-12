@@ -2,7 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-file_name = '/home/ps/projects/ral_fpv_vid/exp_rl_terrain_2'
+file_name = '/home/ps/projects/ral_fpv_vid/exp_mpc_1'
 record_time = 70
 
 # Configure depth and color streams

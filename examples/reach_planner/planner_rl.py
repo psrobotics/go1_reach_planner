@@ -259,7 +259,7 @@ try:
             _t_e = math.ceil((_upper+_lower)/2)
             _i_t = _t_e
             v_dist_t = data_f[_i_t, state_index_i[2], state_index_i[1], state_index_i[0]]
-            if (v_dist_t > -0.001): # 0.001
+            if (v_dist_t > 0.001): # 0.001
                 _lower = _i_t
             else:
                 _upper = _i_t-1
