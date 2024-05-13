@@ -42,7 +42,7 @@ def low_level_callback():
     lgr.info(csv_row)
     
     # 100hz callback 0.025
-    threading.Timer(0.025, low_level_callback).start()
+    threading.Timer(0.050, low_level_callback).start()
 
 
 # Send a UDP message to the specified IP address and port, low-level controller
@@ -128,7 +128,7 @@ cmd_duration = 0.5
 cmd_footswing = 0.08 # foot swing height max(0,adj)*0.32+0.03
 cmd_ori_pitch = 0.0 # -0.4~0.4
 cmd_ori_roll = 0.0
-cmd_stance_width = 0.33 # fpp width
+cmd_stance_width = 0.25 # fpp width 0.33
 cmd_stance_length = 0.40 # fpp len
 
 # mat states
@@ -151,17 +151,17 @@ global_opti_ctr = 0.0
 # turning rate k, we have 
 omega_k_arr  = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 0.7, 0.6, 0.2])
 # forward velocity k
-x_vel_k_arr  = np.array([1.0, 0.8, 0.6, 0.4, 0.2, 1.0, 0.5, 3.0])
+x_vel_k_arr  = np.array([1.0, 0.8, 0.6, 0.4, 0.2, 1.0, 0.5, 1.5])
 # body gait state
-height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.12, -0.30, 0.3])
+height_arr   = np.array([0.12, 0.12, 0.12, 0.12, 0.12, 0.0, -0.30, 0.12])
 pitch_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 roll_arr     = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 
-phase_arr    = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0])
+phase_arr    = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
 offset_arr   = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 bound_arr    = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
 duration_arr = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-freq_arr     = np.array([3.0, 3.0, 3.0, 3.0, 3.0, 2.7, 3.0, 2.7])
+freq_arr     = np.array([3.0, 3.0, 3.0, 3.15, 3.15, 3.6, 3.2, 3.0])
 
 # low pass filter parameters
 x_vel_old = 0.0
@@ -286,7 +286,7 @@ try:
         body_h_n = height_arr[opti_mode-1]
 
         cmd_x_vel = (0.5*x_vel_old + 0.5*x_vel_n)*1.0
-        cmd_yaw_vel = (0.7*yaw_vel_old + 0.3*yaw_vel_n)*0.95 # 0.6 is the k for heading angle
+        cmd_yaw_vel = (0.3*yaw_vel_old + 0.7*yaw_vel_n)*0.8 # 0.6 is the k for heading angle
         cmd_height = 0.5*body_h_old + 0.5*body_h_n
         
         cmd_ori_pitch = pitch_arr[opti_mode-1]
