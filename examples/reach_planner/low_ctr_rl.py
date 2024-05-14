@@ -27,6 +27,7 @@ import threading
 
 
 def low_level_callback():
+
     print (time.ctime())
 
     low_command = np.array([cmd_x_vel, cmd_y_vel, cmd_yaw_vel,
@@ -43,8 +44,8 @@ def low_level_callback():
     lgr.info(csv_row)
     #print("low level command sent\n")
     
-    # 100hz callback 0.025
-    threading.Timer(0.025, low_level_callback).start()
+    # 100hz callback 0.025 *0.050
+    threading.Timer(0.050, low_level_callback).start()
 
 # Send a UDP message to the specified IP address and port, low-level controller
 def send_udp_message(message, ip, port):
@@ -55,6 +56,8 @@ def send_udp_message(message, ip, port):
     
 # lcm handle function, update state variables, get the log here
 def lcm_handler(channel, data):
+    global cmd_x_vel, cmd_yaw_vel
+
     msg = twist.decode(data)
     print("   Received message on channel \"%s\"" % channel)
     print("   timestamp   = %s" % str(msg.timestamp))

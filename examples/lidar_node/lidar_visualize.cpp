@@ -71,6 +71,7 @@ void visualize_obst_map(bool *obst_map) {
                 int y2 = y1 + CELL_SIZE;
                 // draw a filled rectangle for the obstacle
                 cv::rectangle(map_image, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 0), -1);
+                
             }
         }
     }
